@@ -1,0 +1,50 @@
+{
+  "name": "ping-js-api",
+  "version": "1.0.0",
+  "description": "Node implementation of Ping Finances API",
+  "main": "src/head/main.ts",
+  "scripts": {
+    "start": "node -r ts-node/register src/head/main.ts",
+    "dev": "npx nodemon --inspect=5858 ",
+    "test": "jest",
+    "test:watch": "jest --watch"
+  },
+  "jest": {
+    "transform": {
+      ".(ts|tsx)": "ts-jest"
+    },
+    "testRegex": "(/__tests__/.*|\\.(test|spec))\\.(ts|tsx|js)$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "json"
+    ]
+  },
+  "author": "Eran Machiels",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/dotenv": "^6.1.1",
+    "@types/express": "^4.17.0",
+    "@types/jest": "^24.0.16",
+    "@types/node": "^12.6.9",
+    "@typescript-eslint/eslint-plugin": "^2.0.0",
+    "@typescript-eslint/parser": "^2.0.0",
+    "eslint": "^6.1.0",
+    "eslint-config-airbnb-typescript": "^4.0.1",
+    "eslint-config-prettier": "^6.1.0",
+    "eslint-plugin-import": "^2.18.2",
+    "eslint-plugin-prettier": "^3.1.0",
+    "jest": "^24.8.0",
+    "prettier": "^1.18.2",
+    "ts-jest": "^24.0.2",
+    "typescript": "^3.5.3"
+  },
+  "dependencies": {
+    "dotenv": "^8.0.0",
+    "express": "^4.17.1",
+    "inversify": "^5.0.1",
+    "reflect-metadata": "^0.1.13",
+    "ts-node": "^8.3.0"
+  }
+}
