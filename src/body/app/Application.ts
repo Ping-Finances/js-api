@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import EventsEmitter from 'events';
 import { Container, interfaces } from 'inversify';
 import { ApplicationContract } from '../contracts/application/ApplicationContract';
