@@ -1,14 +1,15 @@
-import Application from '../app/Application';
 import { ProviderContract } from '../contracts/providers/ProviderContract';
+import { ApplicationContract } from '../contracts/application/ApplicationContract';
+import { inject } from 'inversify';
 
 export default class Provider implements ProviderContract {
-    app: Application;
+    app: ApplicationContract;
 
-    constructor(app: Application) {
+    constructor(@inject('app') app: ApplicationContract) {
         this.app = app;
     }
 
-    boot(): void {
+    boot(): Promise<void> {
         throw new Error(
             `Boot method should be implemented in class ${this.constructor.name}`
         );
