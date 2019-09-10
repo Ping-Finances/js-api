@@ -3,86 +3,158 @@ import EventsEmitter from 'events';
 import { Container, interfaces } from 'inversify';
 import { ApplicationContract } from '../contracts/application/ApplicationContract';
 import { ProviderContract } from '../contracts/providers/ProviderContract';
+import { LoggingServiceProvider } from '../heart/logging/LoggingServiceProvider';
+import { Newable } from '../heart/support/interfaces/Newable';
 
-export default class Application extends EventsEmitter
-    implements ApplicationContract {
+export class Application extends EventsEmitter implements ApplicationContract {
     private booted = false;
 
-    private static instance: Application;
+    private static container: Container;
 
-    private readonly container: Container;
-
-    private constructor() {
+    public constructor() {
         super();
 
         this.emit('boot:before');
 
-        this.container = new Container();
+        Application.container = new Container();
 
         this.initialize().then(() => {
             this.booted = true;
-            this.emit('boot:after');
+            this.emit('booted');
         });
     }
 
-    private async initialize(): Promise<void> {
+    private initialize(): Promise<void> {
         return new Promise(
-            (resolve: (value?: void | PromiseLike<void>) => void) => {
-                resolve();
+            (resolve: (value?: void | PromiseLike<void>) => void): void => {
+                this.registerBaseBindings();
+                this.registerProvider(new LoggingServiceProvider(this)).then(
+                    () => {
+                        resolve();
+                    }
+                );
             }
         );
     }
 
-    public registerProvider(provider: ProviderContract): void {
-        if (provider.boot && typeof provider.boot === 'function') {
-            provider.boot.call(provider);
+    /**
+     * Registers basic services in the container.
+     * These bindings are needed when booting the application.
+     *
+     * @return {void}
+     *
+     * @since 1.0.0
+     */
+    private registerBaseBindings(): void {
+        this.instance<ApplicationContract>('app', this);
+    }
+
+    /**
+     * Register a service provider in the application.
+     *
+     * @since 1.0.0
+     */
+    public async registerProvider(provider: ProviderContract): Promise<void> {
+        await provider.boot();
+
+        if (provider.register && typeof provider.register === 'function') {
+            provider.register();
         }
 
         this.emit('provider:registered', provider.constructor.name);
     }
 
+    /**
+     * Bind a service to the container, so it
+     * can be injected in services later on.
+     *
+     * @since 1.0.0
+     */
     public bind<T>(
         provider: interfaces.ServiceIdentifier<T>,
-        constructor: {
-            new (...args: any[]): T;
-        }
+        constructor: Newable<T>
     ): Application {
-        const identifier = this.convertToSymbolIfString(provider);
-        this.getContainer()
-            .rebind<T>(identifier)
-            .to(constructor);
+        const identifier = Application.convertToSymbolIfString(provider);
+
+        if (this.getContainer().isBound(identifier)) {
+            this.getContainer()
+                .rebind<T>(identifier)
+                .to(constructor);
+        } else {
+            this.getContainer()
+                .bind<T>(identifier)
+                .to(constructor);
+        }
 
         return this;
     }
 
+    public bindFactory<T>(
+        provider: interfaces.ServiceIdentifier<T>,
+        factory: (context: interfaces.Context) => T
+    ): Application {
+        const identifier = Application.convertToSymbolIfString(provider);
+
+        this.getContainer()
+            .bind<T>(identifier)
+            .toDynamicValue(factory);
+
+        return this;
+    }
+
+    /**
+     * Register an instance to the container.
+     * When resolving, all returned objects are the same.
+     *
+     * @since 1.0.0
+     */
     public instance<T>(
         provider: interfaces.ServiceIdentifier<T>,
         instance: T
     ): Application {
-        const identifier = this.convertToSymbolIfString(provider);
-        this.getContainer()
-            .rebind<T>(identifier)
-            .toConstantValue(instance);
+        const identifier = Application.convertToSymbolIfString(provider);
+
+        if (this.getContainer().isBound(identifier)) {
+            this.getContainer()
+                .rebind<T>(identifier)
+                .toConstantValue(instance);
+        } else {
+            this.getContainer()
+                .bind<T>(identifier)
+                .toConstantValue(instance);
+        }
 
         return this;
     }
 
     public singleton<T>(
         provider: interfaces.ServiceIdentifier<T>,
-        constructor: {
-            new (...args: any[]): T;
-        }
+        constructor: Newable<T>
     ): Application {
-        const identifier = this.convertToSymbolIfString(provider);
-        this.getContainer()
-            .rebind<T>(identifier)
-            .to(constructor)
-            .inSingletonScope();
+        const identifier = Application.convertToSymbolIfString(provider);
+
+        if (this.getContainer().isBound(identifier)) {
+            this.getContainer()
+                .rebind<T>(identifier)
+                .to(constructor)
+                .inSingletonScope();
+        } else {
+            this.getContainer()
+                .bind<T>(identifier)
+                .to(constructor)
+                .inSingletonScope();
+        }
 
         return this;
     }
 
-    private convertToSymbolIfString(provider: any): symbol {
+    public get<T>(provider: interfaces.ServiceIdentifier<T>): T {
+        const identifier = Application.convertToSymbolIfString(provider);
+
+        return this.getContainer().get<T>(identifier);
+    }
+
+    private static convertToSymbolIfString(provider: any): symbol {
         if (typeof provider === 'string') {
             return Symbol.for(provider);
         }
@@ -91,18 +163,14 @@ export default class Application extends EventsEmitter
     }
 
     public getContainer(): Container {
-        return this.container;
-    }
-
-    public static getInstance(): Application {
-        if (!Application.instance) {
-            Application.instance = new Application();
-        }
-
-        return Application.instance;
+        return Application.container;
     }
 
     public isBooted(): boolean {
         return this.booted;
+    }
+
+    public onBooted(callback: (...args: any[]) => void): void {
+        this.on('booted', callback);
     }
 }

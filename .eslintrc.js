@@ -18,10 +18,11 @@ module.exports = {
         'es6': true
     },
     'rules': {
-        'comma-dangle': ['off'],
-        'class-methods-use-this': 'warn',
-        'import/prefer-default-emport': 0,
+        'comma-dangle': "off",
+        'class-methods-use-this': 'off',
+        'import/prefer-default-export': 'off',
+        'quotes': ['error', 'single', { 'allowTemplateLiterals': true }],
         '@typescript-eslint/indent': ['error', 4],
-        'quotes': ['error', 'single', { 'allowTemplateLiterals': true }]
+        '@typescript-eslint/no-explicit-any': "off"
     }
 }
