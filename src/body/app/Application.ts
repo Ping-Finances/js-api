@@ -4,6 +4,7 @@ import { Container, interfaces } from 'inversify';
 import { ApplicationContract } from '../contracts/application/ApplicationContract';
 import { ProviderContract } from '../contracts/providers/ProviderContract';
 import LoggingServiceProvider from '../heart/logging/LoggingServiceProvider';
+import { Newable } from '../heart/support/interfaces/Newable';
 
 export default class Application extends EventsEmitter
     implements ApplicationContract {
@@ -72,9 +73,7 @@ export default class Application extends EventsEmitter
      */
     public bind<T>(
         provider: interfaces.ServiceIdentifier<T>,
-        constructor: {
-            new (...args: any[]): T;
-        }
+        constructor: Newable<T>
     ): Application {
         const identifier = Application.convertToSymbolIfString(provider);
 
@@ -131,9 +130,7 @@ export default class Application extends EventsEmitter
 
     public singleton<T>(
         provider: interfaces.ServiceIdentifier<T>,
-        constructor: {
-            new (...args: any[]): T;
-        }
+        constructor: Newable<T>
     ): Application {
         const identifier = Application.convertToSymbolIfString(provider);
 
