@@ -1,11 +1,10 @@
 import { ProviderContract } from '../contracts/providers/ProviderContract';
 import { ApplicationContract } from '../contracts/application/ApplicationContract';
-import { inject } from 'inversify';
 
 export class Provider implements ProviderContract {
     app: ApplicationContract;
 
-    constructor(@inject('app') app: ApplicationContract) {
+    constructor(app: ApplicationContract) {
         this.app = app;
     }
 
