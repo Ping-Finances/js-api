@@ -2,7 +2,7 @@ import { ProviderContract } from '../contracts/providers/ProviderContract';
 import { ApplicationContract } from '../contracts/application/ApplicationContract';
 import { inject } from 'inversify';
 
-export default class Provider implements ProviderContract {
+export class Provider implements ProviderContract {
     app: ApplicationContract;
 
     constructor(@inject('app') app: ApplicationContract) {

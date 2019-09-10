@@ -3,11 +3,10 @@ import EventsEmitter from 'events';
 import { Container, interfaces } from 'inversify';
 import { ApplicationContract } from '../contracts/application/ApplicationContract';
 import { ProviderContract } from '../contracts/providers/ProviderContract';
-import LoggingServiceProvider from '../heart/logging/LoggingServiceProvider';
+import { LoggingServiceProvider } from '../heart/logging/LoggingServiceProvider';
 import { Newable } from '../heart/support/interfaces/Newable';
 
-export default class Application extends EventsEmitter
-    implements ApplicationContract {
+export class Application extends EventsEmitter implements ApplicationContract {
     private booted = false;
 
     private static container: Container;
