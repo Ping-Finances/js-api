@@ -3,7 +3,7 @@ import EventsEmitter from 'events';
 import { Container, interfaces } from 'inversify';
 import { ApplicationContract } from '../contracts/application/ApplicationContract';
 import { ProviderContract } from '../contracts/providers/ProviderContract';
-import LoggingServiceProvider from '../services/logging/LoggingServiceProvider';
+import LoggingServiceProvider from '../heart/logging/LoggingServiceProvider';
 
 export default class Application extends EventsEmitter
     implements ApplicationContract {
@@ -78,15 +78,28 @@ export default class Application extends EventsEmitter
     ): Application {
         const identifier = Application.convertToSymbolIfString(provider);
 
-        if (Application.getContainer().isBound(identifier)) {
-            Application.getContainer()
+        if (this.getContainer().isBound(identifier)) {
+            this.getContainer()
                 .rebind<T>(identifier)
                 .to(constructor);
         } else {
-            Application.getContainer()
+            this.getContainer()
                 .bind<T>(identifier)
                 .to(constructor);
         }
+
+        return this;
+    }
+
+    public bindFactory<T>(
+        provider: interfaces.ServiceIdentifier<T>,
+        factory: (context: interfaces.Context) => T
+    ): Application {
+        const identifier = Application.convertToSymbolIfString(provider);
+
+        this.getContainer()
+            .bind<T>(identifier)
+            .toDynamicValue(factory);
 
         return this;
     }
@@ -103,12 +116,12 @@ export default class Application extends EventsEmitter
     ): Application {
         const identifier = Application.convertToSymbolIfString(provider);
 
-        if (Application.getContainer().isBound(identifier)) {
-            Application.getContainer()
+        if (this.getContainer().isBound(identifier)) {
+            this.getContainer()
                 .rebind<T>(identifier)
                 .toConstantValue(instance);
         } else {
-            Application.getContainer()
+            this.getContainer()
                 .bind<T>(identifier)
                 .toConstantValue(instance);
         }
@@ -124,13 +137,13 @@ export default class Application extends EventsEmitter
     ): Application {
         const identifier = Application.convertToSymbolIfString(provider);
 
-        if (Application.getContainer().isBound(identifier)) {
-            Application.getContainer()
+        if (this.getContainer().isBound(identifier)) {
+            this.getContainer()
                 .rebind<T>(identifier)
                 .to(constructor)
                 .inSingletonScope();
         } else {
-            Application.getContainer()
+            this.getContainer()
                 .bind<T>(identifier)
                 .to(constructor)
                 .inSingletonScope();
@@ -142,7 +155,7 @@ export default class Application extends EventsEmitter
     public get<T>(provider: interfaces.ServiceIdentifier<T>): T {
         const identifier = Application.convertToSymbolIfString(provider);
 
-        return Application.getContainer().get<T>(identifier);
+        return this.getContainer().get<T>(identifier);
     }
 
     private static convertToSymbolIfString(provider: any): symbol {
@@ -153,7 +166,7 @@ export default class Application extends EventsEmitter
         return provider;
     }
 
-    public static getContainer(): Container {
+    public getContainer(): Container {
         return Application.container;
     }
 
