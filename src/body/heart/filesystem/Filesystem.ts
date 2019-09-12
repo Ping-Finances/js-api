@@ -1,11 +1,9 @@
 import EventEmitter from 'events';
 import fs from 'fs';
-import { decorate, injectable } from 'inversify';
+import { injectable } from 'inversify';
 import { FileSystemContract } from '../../contracts/filesystem/FileSystemContract';
 import { FileList } from './FileList';
 import { File } from './File';
-
-decorate(injectable(), EventEmitter);
 
 @injectable()
 export class Filesystem extends EventEmitter implements FileSystemContract {
