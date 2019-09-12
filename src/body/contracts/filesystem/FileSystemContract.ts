@@ -1,4 +1,4 @@
-import { FileList } from '../../heart/filesystem/FileList';
+import { FileList } from '../../filesystem/FileList';
 
 export interface FileSystemContract {
     /**

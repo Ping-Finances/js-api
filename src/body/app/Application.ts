@@ -3,9 +3,9 @@ import EventsEmitter from 'events';
 import { Container, interfaces } from 'inversify';
 import { ApplicationContract } from '../contracts/application/ApplicationContract';
 import { ProviderContract } from '../contracts/providers/ProviderContract';
-import { LoggingServiceProvider } from '../heart/logging/LoggingServiceProvider';
-import { Newable } from '../heart/support/interfaces/Newable';
-import { FilesystemServiceProvider } from '../heart/filesystem/FilesystemServiceProvider';
+import { LoggingServiceProvider } from '../logging/LoggingServiceProvider';
+import { Newable } from '../support/interfaces/Newable';
+import { FilesystemServiceProvider } from '../filesystem/FilesystemServiceProvider';
 import { NotBoundError } from './NotBoundError';
 
 export class Application extends EventsEmitter implements ApplicationContract {
