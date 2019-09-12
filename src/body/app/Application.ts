@@ -5,6 +5,7 @@ import { ApplicationContract } from '../contracts/application/ApplicationContrac
 import { ProviderContract } from '../contracts/providers/ProviderContract';
 import { LoggingServiceProvider } from '../heart/logging/LoggingServiceProvider';
 import { Newable } from '../heart/support/interfaces/Newable';
+import { FilesystemServiceProvider } from '../heart/filesystem/FilesystemServiceProvider';
 import { NotBoundError } from './NotBoundError';
 
 export class Application extends EventsEmitter implements ApplicationContract {
@@ -30,6 +31,7 @@ export class Application extends EventsEmitter implements ApplicationContract {
             (resolve: (value?: void | PromiseLike<void>) => void): void => {
                 this.registerBaseBindings();
                 this.registerProvider(new LoggingServiceProvider(this));
+                this.registerProvider(new FilesystemServiceProvider(this));
 
                 resolve();
             }
