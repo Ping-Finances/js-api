@@ -5,6 +5,8 @@ import { ApplicationContract } from '../contracts/application/ApplicationContrac
 import { ProviderContract } from '../contracts/providers/ProviderContract';
 import { LoggingServiceProvider } from '../heart/logging/LoggingServiceProvider';
 import { Newable } from '../heart/support/interfaces/Newable';
+import { FilesystemServiceProvider } from '../heart/filesystem/FilesystemServiceProvider';
+import { NotBoundError } from './NotBoundError';
 
 export class Application extends EventsEmitter implements ApplicationContract {
     private booted = false;
@@ -28,11 +30,10 @@ export class Application extends EventsEmitter implements ApplicationContract {
         return new Promise(
             (resolve: (value?: void | PromiseLike<void>) => void): void => {
                 this.registerBaseBindings();
-                this.registerProvider(new LoggingServiceProvider(this)).then(
-                    () => {
-                        resolve();
-                    }
-                );
+                this.registerProvider(new LoggingServiceProvider(this));
+                this.registerProvider(new FilesystemServiceProvider(this));
+
+                resolve();
             }
         );
     }
@@ -55,7 +56,9 @@ export class Application extends EventsEmitter implements ApplicationContract {
      * @since 1.0.0
      */
     public async registerProvider(provider: ProviderContract): Promise<void> {
-        await provider.boot();
+        if (provider.boot && typeof provider.boot === 'function') {
+            await provider.boot();
+        }
 
         if (provider.register && typeof provider.register === 'function') {
             provider.register();
@@ -73,33 +76,53 @@ export class Application extends EventsEmitter implements ApplicationContract {
     public bind<T>(
         provider: interfaces.ServiceIdentifier<T>,
         constructor: Newable<T>
-    ): Application {
-        const identifier = Application.convertToSymbolIfString(provider);
+    ): Promise<ApplicationContract> {
+        return new Promise<ApplicationContract>(
+            (
+                resolve: (
+                    value?: ApplicationContract | PromiseLike<ApplicationContract>
+                ) => void
+            ): void => {
+                const identifier = Application.convertToSymbolIfString(
+                    provider
+                );
 
-        if (this.getContainer().isBound(identifier)) {
-            this.getContainer()
-                .rebind<T>(identifier)
-                .to(constructor);
-        } else {
-            this.getContainer()
-                .bind<T>(identifier)
-                .to(constructor);
-        }
+                if (this.getContainer().isBound(identifier)) {
+                    this.getContainer()
+                        .rebind<T>(identifier)
+                        .to(constructor);
+                } else {
+                    this.getContainer()
+                        .bind<T>(identifier)
+                        .to(constructor);
+                }
 
-        return this;
+                resolve(this);
+            }
+        );
     }
 
     public bindFactory<T>(
         provider: interfaces.ServiceIdentifier<T>,
         factory: (context: interfaces.Context) => T
-    ): Application {
-        const identifier = Application.convertToSymbolIfString(provider);
+    ): Promise<ApplicationContract> {
+        return new Promise<ApplicationContract>(
+            (
+                resolve: (
+                    value?: ApplicationContract | PromiseLike<ApplicationContract>
+                ) => void
+            ): void => {
+                const identifier = Application.convertToSymbolIfString(
+                    provider
+                );
 
-        this.getContainer()
-            .bind<T>(identifier)
-            .toDynamicValue(factory);
+                this.getContainer()
+                    .bind<T>(identifier)
+                    .toDynamicValue(factory);
 
-        return this;
+                resolve(this);
+            }
+        );
     }
 
     /**
@@ -111,47 +134,84 @@ export class Application extends EventsEmitter implements ApplicationContract {
     public instance<T>(
         provider: interfaces.ServiceIdentifier<T>,
         instance: T
-    ): Application {
-        const identifier = Application.convertToSymbolIfString(provider);
+    ): Promise<ApplicationContract> {
+        return new Promise<ApplicationContract>(
+            (
+                resolve: (
+                    value?: ApplicationContract | PromiseLike<ApplicationContract>
+                ) => void
+            ): void => {
+                const identifier = Application.convertToSymbolIfString(
+                    provider
+                );
 
-        if (this.getContainer().isBound(identifier)) {
-            this.getContainer()
-                .rebind<T>(identifier)
-                .toConstantValue(instance);
-        } else {
-            this.getContainer()
-                .bind<T>(identifier)
-                .toConstantValue(instance);
-        }
+                if (this.getContainer().isBound(identifier)) {
+                    this.getContainer()
+                        .rebind<T>(identifier)
+                        .toConstantValue(instance);
+                } else {
+                    this.getContainer()
+                        .bind<T>(identifier)
+                        .toConstantValue(instance);
+                }
 
-        return this;
+                resolve(this);
+            }
+        );
     }
 
     public singleton<T>(
         provider: interfaces.ServiceIdentifier<T>,
         constructor: Newable<T>
-    ): Application {
-        const identifier = Application.convertToSymbolIfString(provider);
+    ): Promise<ApplicationContract> {
+        return new Promise<ApplicationContract>(
+            (
+                resolve: (
+                    value?: ApplicationContract | PromiseLike<ApplicationContract>
+                ) => void
+            ): void => {
+                const identifier = Application.convertToSymbolIfString(
+                    provider
+                );
 
-        if (this.getContainer().isBound(identifier)) {
-            this.getContainer()
-                .rebind<T>(identifier)
-                .to(constructor)
-                .inSingletonScope();
-        } else {
-            this.getContainer()
-                .bind<T>(identifier)
-                .to(constructor)
-                .inSingletonScope();
-        }
+                if (this.getContainer().isBound(identifier)) {
+                    this.getContainer()
+                        .rebind<T>(identifier)
+                        .to(constructor)
+                        .inSingletonScope();
+                } else {
+                    this.getContainer()
+                        .bind<T>(identifier)
+                        .to(constructor)
+                        .inSingletonScope();
+                }
 
-        return this;
+                resolve(this);
+            }
+        );
     }
 
-    public get<T>(provider: interfaces.ServiceIdentifier<T>): T {
-        const identifier = Application.convertToSymbolIfString(provider);
+    public get<T>(provider: interfaces.ServiceIdentifier<T>): Promise<T> {
+        return new Promise<T>(
+            (
+                resolve: (value?: T | PromiseLike<T>) => void,
+                reject: (reason?: any) => void
+            ): void => {
+                const identifier = Application.convertToSymbolIfString(
+                    provider
+                );
 
-        return this.getContainer().get<T>(identifier);
+                if (!this.getContainer().isBound(identifier)) {
+                    reject(
+                        new NotBoundError(
+                            `${String(provider)} not bound to container`
+                        )
+                    );
+                } else {
+                    resolve(this.getContainer().get<T>(identifier));
+                }
+            }
+        );
     }
 
     private static convertToSymbolIfString(provider: any): symbol {

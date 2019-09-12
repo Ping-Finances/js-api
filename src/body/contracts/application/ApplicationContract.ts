@@ -1,30 +1,31 @@
 import { interfaces } from 'inversify';
 import { ProviderContract } from '../providers/ProviderContract';
 import { Newable } from '../../heart/support/interfaces/Newable';
+
 export interface ApplicationContract {
     isBooted(): boolean;
 
     bind<T>(
         provider: interfaces.ServiceIdentifier<T>,
         constructor: Newable<T>
-    ): ApplicationContract;
+    ): Promise<ApplicationContract>;
 
     bindFactory<T>(
         provider: interfaces.ServiceIdentifier<T>,
         factory: (context: interfaces.Context) => T
-    ): ApplicationContract;
+    ): Promise<ApplicationContract>;
 
     instance<T>(
         provider: interfaces.ServiceIdentifier<T>,
         instance: T
-    ): ApplicationContract;
+    ): Promise<ApplicationContract>;
 
     singleton<T>(
         provider: interfaces.ServiceIdentifier<T>,
         constructor: Newable<T>
-    ): ApplicationContract;
+    ): Promise<ApplicationContract>;
 
-    get<T>(provider: interfaces.ServiceIdentifier<T>): T;
+    get<T>(provider: interfaces.ServiceIdentifier<T>): Promise<T>;
 
     registerProvider(provider: ProviderContract): Promise<void>;
 
