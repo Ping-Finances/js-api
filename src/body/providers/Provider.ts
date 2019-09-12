@@ -7,10 +7,4 @@ export class Provider implements ProviderContract {
     constructor(app: ApplicationContract) {
         this.app = app;
     }
-
-    boot(): Promise<void> {
-        throw new Error(
-            `Boot method should be implemented in class ${this.constructor.name}`
-        );
-    }
 }
