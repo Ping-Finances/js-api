@@ -1,6 +1,6 @@
 import * as winston from 'winston';
-import { Provider } from '../../providers/Provider';
-import { ProviderContract } from '../../contracts/providers/ProviderContract';
+import { Provider } from '../providers/Provider';
+import { ProviderContract } from '../contracts/providers/ProviderContract';
 
 export class LoggingServiceProvider extends Provider
     implements ProviderContract {

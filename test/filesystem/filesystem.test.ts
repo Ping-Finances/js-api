@@ -2,9 +2,9 @@ import EventEmitter from 'events';
 import { decorate, injectable } from 'inversify';
 import { Application } from '../../src/body/app/Application';
 import { FileSystemContract } from '../../src/body/contracts/filesystem/FileSystemContract';
-import { Filesystem } from '../../src/body/heart/filesystem/Filesystem';
-import { FileList } from '../../src/body/heart/filesystem/FileList';
-import { File } from '../../src/body/heart/filesystem/File';
+import { Filesystem } from '../../src/body/filesystem/Filesystem';
+import { FileList } from '../../src/body/filesystem/FileList';
+import { File } from '../../src/body/filesystem/File';
 
 
 Object.getPrototypeOf(EventEmitter.prototype).constructor = Object;

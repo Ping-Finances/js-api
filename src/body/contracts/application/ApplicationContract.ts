@@ -1,6 +1,6 @@
 import { interfaces } from 'inversify';
 import { ProviderContract } from '../providers/ProviderContract';
-import { Newable } from '../../heart/support/interfaces/Newable';
+import { Newable } from '../../support/interfaces/Newable';
 
 export interface ApplicationContract {
     isBooted(): boolean;
