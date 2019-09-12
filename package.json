@@ -2,9 +2,9 @@
   "name": "ping-js-api",
   "version": "1.0.0",
   "description": "Node implementation of Ping Finances API",
-  "main": "src/head/main.ts",
+  "main": "src/main.ts",
   "scripts": {
-    "start": "node -r ts-node/register src/head/main.ts",
+    "start": "node -r ts-node/register src/main.ts",
     "dev": "npx nodemon --inspect=5858 ",
     "test": "jest",
     "test:watch": "jest --watch"
