@@ -21,6 +21,8 @@ module.exports = {
         'comma-dangle': "off",
         'class-methods-use-this': 'off',
         'import/prefer-default-export': 'off',
+        'import/no-dynamic-require': 'off',
+        'global-require': 'off',
         'quotes': ['error', 'single', { 'allowTemplateLiterals': true }],
         '@typescript-eslint/indent': ['error', 4],
         '@typescript-eslint/no-explicit-any': "off"
