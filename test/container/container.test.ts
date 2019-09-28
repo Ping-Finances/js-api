@@ -14,15 +14,45 @@ class ResolvableClass implements ResolvableClassInterface {
 
 describe('container bind and resolve test', () => {
     test('should bind and resolve a class', async () => {
+        // arrange
         const application = new Application();
         await application.bind<ResolvableClassInterface>(
             'shouldResolve',
             ResolvableClass
         );
-        const resolved = await application.get<ResolvableClassInterface>(
+
+        // act
+        const firstResolved = await application.get<ResolvableClassInterface>(
             'shouldResolve'
         );
 
-        expect(resolved.testMethod()).toEqual(true);
+        const secondResolved = await application.get<ResolvableClassInterface>(
+            'shouldResolve'
+        );
+
+        // assert
+        expect(firstResolved.testMethod()).toEqual(true);
+        expect(firstResolved).not.toBe(secondResolved);
+    });
+
+    test('should bind and resolve a singleton of a class', async () => {
+        // arrange
+        const application = new Application();
+        await application.singleton<ResolvableClassInterface>(
+            'shouldResolve',
+            ResolvableClass
+        );
+
+        // act
+        const firstResolved = await application.get<ResolvableClassInterface>(
+            'shouldResolve'
+        );
+        const secondResolved = await application.get<ResolvableClassInterface>(
+            'shouldResolve'
+        );
+
+        // assert
+        expect(firstResolved.testMethod()).toEqual(true);
+        expect(firstResolved).toBe(secondResolved);
     });
 });
