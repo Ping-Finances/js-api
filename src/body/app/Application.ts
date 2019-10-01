@@ -7,35 +7,32 @@ import { LoggingServiceProvider } from '../logging/LoggingServiceProvider';
 import { Newable } from '../support/interfaces/Newable';
 import { FilesystemServiceProvider } from '../filesystem/FilesystemServiceProvider';
 import { NotBoundError } from './NotBoundError';
+import { ConfigContract } from '../contracts/config/ConfigContract';
+import { Repository } from '../config/Repository';
 
 export class Application extends EventsEmitter implements ApplicationContract {
     private booted = false;
 
     private static container: Container;
 
-    public constructor() {
+    private rootPath: string | undefined;
+
+    public constructor(root?: string) {
         super();
 
         this.emit('boot:before');
 
+        this.rootPath = root;
         Application.container = new Container();
-
-        this.initialize().then(() => {
-            this.booted = true;
-            this.emit('booted');
-        });
     }
 
-    private initialize(): Promise<void> {
-        return new Promise(
-            (resolve: (value?: void | PromiseLike<void>) => void): void => {
-                this.registerBaseBindings();
-                this.registerProvider(new LoggingServiceProvider(this));
-                this.registerProvider(new FilesystemServiceProvider(this));
+    public async initialize(): Promise<void> {
+        await this.registerProvider(new LoggingServiceProvider(this));
+        await this.registerProvider(new FilesystemServiceProvider(this));
+        await this.registerBaseBindings();
 
-                resolve();
-            }
-        );
+        this.booted = true;
+        this.emit('booted');
     }
 
     /**
@@ -46,8 +43,9 @@ export class Application extends EventsEmitter implements ApplicationContract {
      *
      * @since 1.0.0
      */
-    private registerBaseBindings(): void {
+    private async registerBaseBindings(): Promise<void> {
         this.instance<ApplicationContract>('app', this);
+        this.singleton<ConfigContract>('config', Repository);
     }
 
     /**
@@ -61,7 +59,7 @@ export class Application extends EventsEmitter implements ApplicationContract {
         }
 
         if (provider.register && typeof provider.register === 'function') {
-            provider.register();
+            await provider.register();
         }
 
         this.emit('provider:registered', provider.constructor.name);
@@ -73,33 +71,23 @@ export class Application extends EventsEmitter implements ApplicationContract {
      *
      * @since 1.0.0
      */
-    public bind<T>(
+    public async bind<T>(
         provider: interfaces.ServiceIdentifier<T>,
         constructor: Newable<T>
     ): Promise<ApplicationContract> {
-        return new Promise<ApplicationContract>(
-            (
-                resolve: (
-                    value?: ApplicationContract | PromiseLike<ApplicationContract>
-                ) => void
-            ): void => {
-                const identifier = Application.convertToSymbolIfString(
-                    provider
-                );
+        const identifier = Application.convertToSymbolIfString(provider);
 
-                if (this.getContainer().isBound(identifier)) {
-                    this.getContainer()
-                        .rebind<T>(identifier)
-                        .to(constructor);
-                } else {
-                    this.getContainer()
-                        .bind<T>(identifier)
-                        .to(constructor);
-                }
+        if (this.getContainer().isBound(identifier)) {
+            this.getContainer()
+                .rebind<T>(identifier)
+                .to(constructor);
+        } else {
+            this.getContainer()
+                .bind<T>(identifier)
+                .to(constructor);
+        }
 
-                resolve(this);
-            }
-        );
+        return this;
     }
 
     public bindFactory<T>(
@@ -232,5 +220,13 @@ export class Application extends EventsEmitter implements ApplicationContract {
 
     public onBooted(callback: (...args: any[]) => void): void {
         this.on('booted', callback);
+    }
+
+    public setRoothPath(path: string): void {
+        this.rootPath = path;
+    }
+
+    public getRootPath(): string {
+        return this.rootPath || '';
     }
 }

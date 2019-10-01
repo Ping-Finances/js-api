@@ -32,4 +32,10 @@ export interface ApplicationContract {
     emit(event: string | symbol, ...args: any[]): boolean;
 
     onBooted(callback: (...args: any[]) => void): void;
+
+    initialize(): Promise<void>;
+
+    setRoothPath(path: string): void;
+
+    getRootPath(): string;
 }

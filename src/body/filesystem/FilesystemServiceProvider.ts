@@ -5,7 +5,7 @@ import { Filesystem } from './Filesystem';
 
 export class FilesystemServiceProvider extends Provider
     implements ProviderContract {
-    public register(): void {
-        this.app.bind<FileSystemContract>('filesystem', Filesystem);
+    public async register(): Promise<void> {
+        await this.app.bind<FileSystemContract>('filesystem', Filesystem);
     }
 }

@@ -32,7 +32,7 @@ export class LoggingServiceProvider extends Provider
         });
     }
 
-    public register(): void {
-        this.app.instance<winston.Logger>('log', this.logger);
+    public async register(): Promise<void> {
+        await this.app.instance<winston.Logger>('log', this.logger);
     }
 }
