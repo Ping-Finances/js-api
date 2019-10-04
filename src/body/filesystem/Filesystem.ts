@@ -1,7 +1,7 @@
 import EventEmitter from 'events';
 import fs from 'fs';
 import { injectable } from 'inversify';
-import { FileSystemContract } from '../../contracts/filesystem/FileSystemContract';
+import { FileSystemContract } from '../contracts/filesystem/FileSystemContract';
 import { FileList } from './FileList';
 import { File } from './File';
 
