@@ -25,7 +25,7 @@ export interface ApplicationContract {
         constructor: Newable<T>
     ): Promise<ApplicationContract>;
 
-    get<T>(provider: interfaces.ServiceIdentifier<T>): Promise<T>;
+    get<T>(provider: interfaces.ServiceIdentifier<T>): T;
 
     registerProvider(provider: ProviderContract): Promise<void>;
 
