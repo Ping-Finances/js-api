@@ -25,4 +25,4 @@ module.exports = {
         '@typescript-eslint/indent': ['error', 4],
         '@typescript-eslint/no-explicit-any': "off"
     }
-}
+};
