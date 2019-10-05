@@ -1,18 +1,20 @@
 import EventEmitter from 'events';
 import fs from 'fs';
-import { injectable } from 'inversify';
+import { decorate, injectable } from 'inversify';
 import { FileSystemContract } from '../contracts/filesystem/FileSystemContract';
 import { FileList } from './FileList';
 import { File } from './File';
 import { ItemList } from './ItemList';
 import { Item } from './Item';
 
-@injectable()
+Object.getPrototypeOf(EventEmitter.prototype).constructor = Object;
+decorate(injectable(), EventEmitter);
+
 export class Filesystem extends EventEmitter implements FileSystemContract {
     /**
      * Instance of Node's fs library
      */
-    private fs: any;
+    private readonly fs: any;
 
     /**
      * Filesystem constructor
