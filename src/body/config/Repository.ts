@@ -1,25 +1,20 @@
-import { inject, injectable } from 'inversify';
+import { injectable } from 'inversify';
 import { ConfigContract } from '../contracts/config/ConfigContract';
-import { FileSystemContract } from '../contracts/filesystem/FileSystemContract';
-import { Item } from '../filesystem/Item';
-import { File } from '../filesystem/File';
 import { ApplicationContract } from '../contracts/application/ApplicationContract';
 import { ConfigMap } from './ConfigMap';
-import {ConfigLoader} from './ConfigLoader';
+import { ConfigLoader } from './ConfigLoader';
 
 @injectable()
 export class Repository implements ConfigContract {
-    /**
-     * All config items
-     */
     private static items: ConfigMap = {};
 
-    private loader: ConfigLoader;
+    private readonly loader: ConfigLoader;
 
-    public constructor(items: ConfigMap) {
-        Repository.items = items;
+    private readonly app: ApplicationContract;
 
-        this.loader = new ConfigLoader();
+    public constructor(app: ApplicationContract) {
+        this.app = app;
+        this.loader = new ConfigLoader(this.app);
     }
 
     /**
@@ -28,7 +23,7 @@ export class Repository implements ConfigContract {
      *
      * @since 1.0.0
      */
-    public get(path: string, defaultValue = false): any {
+    public get(path: string, defaultValue: any = null): any {
         const pathParts = path.split('.');
         let copiedConfig = Repository.items;
 
@@ -44,27 +39,37 @@ export class Repository implements ConfigContract {
     }
 
     /**
-     * Sets a value at the given key in the config
+     * Gets the config path
      *
      * @since 1.0.0
      */
-    set(key: string, value: {}): void {
-        Repository.items[key] = value;
+    public getConfigPath(): string {
+        return `${this.app.getHeadPath()}/config`;
     }
 
-    // /**
-    //  * Sets a value on the given path
-    //  *
-    //  * @since 1.0.0
-    //  */
-    // set(key: string, value: any) {
-    //
-    // }
-
+    /**
+     * Loads all config files from the given path
+     *
+     * @since 1.0.0
+     */
     public loadFromPath(path: string): void {
         this.setConfig(this.loader.load(path));
     }
 
+    /**
+     * Sets the main config
+     *
+     * @since 1.0.0
+     */
+    private setConfig(config: any): void {
+        Repository.items = config;
+    }
+
+    /**
+     * Get all items in the config
+     *
+     * @since 1.0.0
+     */
     public getItems(): ConfigMap {
         return Repository.items;
     }

@@ -1,28 +1,52 @@
+import { ConfigMap } from './ConfigMap';
+import { FileSystemContract } from '../contracts/filesystem/FileSystemContract';
+import { ApplicationContract } from '../contracts/application/ApplicationContract';
 import { Item } from '../filesystem/Item';
 import { File } from '../filesystem/File';
-import { ConfigMap } from './ConfigMap';
 
 export class ConfigLoader {
-    private config: ConfigMap;
+    private readonly app: ApplicationContract;
 
-    // public loadFromPath(path: string): void {
-    //     this.filesystem.getItems(path).forEach((item: Item) => {
-    //         if (item.isDirectory()) {
-    //             this.set(item.getName(), {});
-    //
-    //         } else {
-    //             const file = item.getFile() as File;
-    //             // eslint-disable-next-line @typescript-eslint/no-var-requires
-    //             this.set(
-    //                 item.getName(),
-    //                 // eslint-disable-next-line @typescript-eslint/no-var-requires
-    //                 require(`${path}/${file.getName(true)}`)
-    //             );
-    //         }
-    //     });
-    // }
+    private readonly filesystem: FileSystemContract;
 
-    public load(path: string): ConfigMap {
-        let deeperConfig = this.config;
+    public constructor(app: ApplicationContract) {
+        this.app = app;
+        this.filesystem = this.app.get<FileSystemContract>('filesystem');
+    }
+
+    /**
+     * Loads all (nested) config items from the map on the given path
+     *
+     * @since 1.0.0
+     */
+    public load(path: string, nestedConfig: ConfigMap = {}): ConfigMap {
+        let config: ConfigMap = {};
+
+        this.filesystem.getItems(path).forEach((item: Item) => {
+            const nestedConfigCopy = nestedConfig;
+
+            if (item.isDirectory()) {
+                nestedConfigCopy[item.getName()] = {};
+                nestedConfigCopy[item.getName()] = this.load(
+                    `${path}/${item.getName()}`,
+                    nestedConfigCopy[item.getName()]
+                );
+            } else {
+                const file = item.getFile() as File;
+
+                if (
+                    file.getExtension() === 'ts' ||
+                    file.getExtension() === 'js'
+                ) {
+                    nestedConfigCopy[
+                        file.getName()
+                    ] = require(`${path}/${file.getName(true)}`);
+                }
+            }
+
+            config = { ...config, ...nestedConfigCopy };
+        });
+
+        return config;
     }
 }
