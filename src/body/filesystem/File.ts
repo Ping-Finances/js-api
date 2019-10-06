@@ -5,13 +5,13 @@ export class File {
     /**
      * Direction entity to work with
      */
-    private direntFile: fs.Dirent;
+    private dirent: fs.Dirent;
 
     /**
      * File constructor
      */
     constructor(file: fs.Dirent) {
-        this.direntFile = file;
+        this.dirent = file;
     }
 
     /**
@@ -19,10 +19,14 @@ export class File {
      *
      * @since 1.0.0
      */
-    public getName(): string {
-        const parts = this.direntFile.name.split('.');
-        parts.pop();
-        return parts.join('.');
+    public getName(ext = false): string {
+        if (!ext) {
+            const parts = this.dirent.name.split('.');
+            parts.pop();
+            return parts.join('.');
+        }
+
+        return this.dirent.name;
     }
 
     /**
@@ -31,6 +35,10 @@ export class File {
      * @since 1.0.0
      */
     public getExtension(): string {
-        return path.extname(this.direntFile.name).replace('.', '');
+        return path.extname(this.dirent.name).replace('.', '');
+    }
+
+    public getNameWithExtension(): string {
+        return this.dirent.name;
     }
 }

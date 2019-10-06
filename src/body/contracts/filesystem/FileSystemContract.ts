@@ -1,4 +1,5 @@
 import { FileList } from '../../filesystem/FileList';
+import {ItemList} from '../../filesystem/ItemList';
 
 export interface FileSystemContract {
     /**
@@ -21,4 +22,12 @@ export interface FileSystemContract {
      * @since 1.0.0
      */
     getFiles(path: string): FileList;
+
+    /**
+     * Returns a list of entries (files and/or directories
+     * found in the given path
+     *
+     * @since 1.0.0
+     */
+    getItems(path: string): ItemList;
 }
