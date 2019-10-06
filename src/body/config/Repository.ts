@@ -18,8 +18,8 @@ export class Repository implements ConfigContract {
     }
 
     /**
-     * Get an item at the given path, or return the default
-     * value of the path is not valid
+     * Get an item at the given path, or return the default value of the path is
+     * not valid
      *
      * @since 1.0.0
      */

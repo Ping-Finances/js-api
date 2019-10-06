@@ -6,7 +6,7 @@ export class LoggingServiceProvider extends Provider
     implements ProviderContract {
     private logger: winston.Logger;
 
-    public boot(): void {
+    public async initialize(): Promise<void> {
         this.logger = winston.createLogger({
             level: 'error',
             format: winston.format.json(),

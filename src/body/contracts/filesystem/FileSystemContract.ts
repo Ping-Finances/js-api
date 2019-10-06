@@ -1,5 +1,5 @@
 import { FileList } from '../../filesystem/FileList';
-import {ItemList} from '../../filesystem/ItemList';
+import { ItemList } from '../../filesystem/ItemList';
 
 export interface FileSystemContract {
     /**
@@ -24,8 +24,8 @@ export interface FileSystemContract {
     getFiles(path: string): FileList;
 
     /**
-     * Returns a list of entries (files and/or directories
-     * found in the given path
+     * Returns a list of entries (files and/or directories found in the given
+     * path
      *
      * @since 1.0.0
      */

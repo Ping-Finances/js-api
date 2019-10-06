@@ -14,6 +14,8 @@ export class Application extends EventsEmitter implements ApplicationContract {
 
     private static container: Container;
 
+    private providers: ProviderContract[] = [];
+
     private rootPath: string | null;
 
     public constructor(root: string | null = null) {
@@ -45,8 +47,8 @@ export class Application extends EventsEmitter implements ApplicationContract {
     }
 
     /**
-     * Registers basic services in the container.
-     * These bindings are needed when booting the application.
+     * Registers basic services in the container. These bindings are needed when
+     * booting the application.
      *
      * @since 1.0.0
      */
@@ -60,16 +62,22 @@ export class Application extends EventsEmitter implements ApplicationContract {
      * @since 1.0.0
      */
     public async registerProvider(provider: ProviderContract): Promise<void> {
+        if (provider.initialize && typeof provider.initialize === 'function') {
+            await provider.initialize();
+        }
+
         if (provider.register && typeof provider.register === 'function') {
             await provider.register();
         }
+
+        this.providers.push(provider);
 
         this.emit('provider:registered', provider.constructor.name);
     }
 
     /**
-     * Bind a service to the container, so it
-     * can be injected in services later on.
+     * Bind a service to the container, so it can be injected in services later
+     * on.
      *
      * @since 1.0.0
      */
@@ -117,8 +125,8 @@ export class Application extends EventsEmitter implements ApplicationContract {
     }
 
     /**
-     * Register an instance to the container.
-     * When resolving, all returned objects are the same.
+     * Register an instance to the container. When resolving, all returned
+     * objects are the same.
      *
      * @since 1.0.0
      */
@@ -185,8 +193,8 @@ export class Application extends EventsEmitter implements ApplicationContract {
     }
 
     /**
-     * Converts a string to a symbol to get a
-     * unique binding aut of the container
+     * Converts a string to a symbol to get a unique binding aut of the
+     * container.
      *
      * @since 1.0.0
      */
@@ -236,5 +244,14 @@ export class Application extends EventsEmitter implements ApplicationContract {
         }
 
         return `${this.getRootPath()}/head`;
+    }
+
+    /**
+     * Fires a callback when the application is booted
+     *
+     * @since 1.0.0
+     */
+    public onBooted(callback: () => void): void {
+        this.on('booted', callback);
     }
 }

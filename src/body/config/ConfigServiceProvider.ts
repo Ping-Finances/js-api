@@ -7,9 +7,14 @@ export class ConfigServiceProvider extends Provider
     implements ProviderContract {
     private configRepository: ConfigContract;
 
+    async initialize(): Promise<void> {
+        this.configRepository = new Repository(this.app);
+        this.configRepository.loadFromPath(
+            this.configRepository.getConfigPath()
+        );
+    }
+
     async register(): Promise<void> {
-        await this.app.bindFactory<ConfigContract>('config', () => {
-            return new Repository(this.app);
-        });
+        this.app.instance('config', this.configRepository);
     }
 }

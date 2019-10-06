@@ -37,8 +37,4 @@ export class File {
     public getExtension(): string {
         return path.extname(this.dirent.name).replace('.', '');
     }
-
-    public getNameWithExtension(): string {
-        return this.dirent.name;
-    }
 }
